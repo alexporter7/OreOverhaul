@@ -1,10 +1,23 @@
 package com.alexp777.oreoverhaul;
 
+import com.alexp777.oreoverhaul.blocks.CopperBlock;
+import com.alexp777.oreoverhaul.blocks.ModBlocks;
+import com.alexp777.oreoverhaul.blocks.OreCrusherBlock;
+import com.alexp777.oreoverhaul.blocks.OreCrusherTileEntity;
+import com.alexp777.oreoverhaul.items.CopperIngot;
+import com.alexp777.oreoverhaul.setup.ClientProxy;
+import com.alexp777.oreoverhaul.setup.IProxy;
+import com.alexp777.oreoverhaul.setup.ModSetup;
+import com.alexp777.oreoverhaul.setup.ServerProxy;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -19,29 +32,40 @@ import org.apache.logging.log4j.Logger;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
-@Mod("examplemod")
+@Mod("oreoverhaul")
 public class OreOverhaul {
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 
+    //Create the proxy for both Server and Client side methods
+    //Used to ensure that Client-Only commands aren't accessed from
+    //the Server world. Throws an Illegal State Exception
+    public static IProxy proxy = DistExecutor.runForDist(
+            () -> () -> new ClientProxy(), () -> () -> new ServerProxy());
+
+    //Create the ModSetup Object
+    public static ModSetup modSetup = new ModSetup();
+
+    //Declare the Mod ID
+    public static final String MOD_ID = "oreoverhaul";
+
     public OreOverhaul() {
-        // Register the setup method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-        // Register the enqueueIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
-        // Register the processIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
-        // Register the doClientStuff method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup); // Register the setup method for modloading
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC); // Register the enqueueIMC method for modloading
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC); // Register the processIMC method for modloading
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff); // Register the doClientStuff method for modloading
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        // That wonderful Pre-Init Code
-        LOGGER.info("HELLO FROM PREINIT");
+        // That wonderful Pre-Init Code Runs after all blocks and items are registered
+        LOGGER.info("Mod currently in Pre-Init phase");
         LOGGER.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
+        // Run the init() method in ModSetup and in Client/Server Proxy
+        modSetup.init();
+        proxy.init();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -51,10 +75,10 @@ public class OreOverhaul {
 
     private void enqueueIMC(final InterModEnqueueEvent event) {
         // some example code to dispatch IMC to another mod
-        InterModComms.sendTo("examplemod", "helloworld", () -> {
-            LOGGER.info("Hello world from the MDK");
-            return "Hello world";
-        });
+//        InterModComms.sendTo("examplemod", "helloworld", () -> {
+//            LOGGER.info("Hello world from the MDK");
+//            return "Hello world";
+//        });
     }
 
     private void processIMC(final InterModProcessEvent event) {
@@ -67,7 +91,7 @@ public class OreOverhaul {
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(FMLServerStartingEvent event) {
-        // do something when the server starts
+        // Runs when Server Starts
         LOGGER.info("HELLO from server starting");
     }
 
@@ -75,10 +99,40 @@ public class OreOverhaul {
     // Event bus for receiving Registry Events)
     @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class RegistryEvents {
+
         @SubscribeEvent
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
-            // register a new block here
-            LOGGER.info("HELLO from Register Block");
+            LOGGER.info("Registering Blocks");
+            blockRegistryEvent.getRegistry().register(new CopperBlock());
+            blockRegistryEvent.getRegistry().register(new OreCrusherBlock());
         }
+
+        @SubscribeEvent
+        public static void onItemsRegistry(final RegistryEvent.Register<Item> itemRegistryEvent) {
+            //Create the variable for the Item Group
+            Item.Properties itemProperties = new Item.Properties()
+                    .group(modSetup.oreOverhaulItemGroup)
+                    .maxStackSize(64);
+            //======= Items =======
+            LOGGER.info("Registering Items");
+            itemRegistryEvent.getRegistry().register(new CopperIngot());
+            //======= Block Items =======
+            LOGGER.info("Registering Block Items");
+            itemRegistryEvent.getRegistry().register(
+                    new BlockItem(ModBlocks.COPPER_BLOCK, itemProperties).setRegistryName(MOD_ID, "copper_block"));
+            itemRegistryEvent.getRegistry().register(
+                    new BlockItem(ModBlocks.ORE_CRUSHER_BLOCK, itemProperties).setRegistryName(MOD_ID, "ore_crusher_block"));
+        }
+
+        @SubscribeEvent
+        public static void onTileEntityRegistry(final RegistryEvent.Register<TileEntityType<?>> tileEntityRegistryEvent) {
+            //Register the Ore Crusher Tile Entity
+            tileEntityRegistryEvent.getRegistry().register(TileEntityType.Builder
+                    .create(OreCrusherTileEntity::new, ModBlocks.ORE_CRUSHER_BLOCK)
+                    .build(null).setRegistryName(MOD_ID,"ore_crusher_block"));
+
+        }
+
     }
+
 }

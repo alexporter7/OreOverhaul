@@ -1,0 +1,9 @@
+{
+  "block.oreoverhaul.copper_block": "Copper Block",
+  "block.oreoverhaul.ore_crusher_block": "Ore Crusher",
+
+  "item.oreoverhaul.copper_ingot": "Copper Ingot",
+
+  "_comment": "Creative Tabs",
+  "itemGroup.oreoverhaul": "Ore Overhaul"
+}
