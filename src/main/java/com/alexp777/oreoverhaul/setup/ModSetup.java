@@ -10,6 +10,10 @@ import java.util.Hashtable;
 
 public class ModSetup {
 
+    //======= Registry Names =======
+    public static final String ORE_CRUSHER_REGISTRY_NAME = "ore_crusher_block";
+    public static final String COPPER_BLOCK_REGISTRY_NAME = "copper_block";
+
     //======= Machine Related Block Properties =======
     public static final float MACHINE_HARDNESS = 4.0f;
     public static final SoundType MACHINE_SOUND = SoundType.METAL;

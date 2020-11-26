@@ -1,5 +1,6 @@
 package com.alexp777.oreoverhaul.blocks;
 
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.registries.ObjectHolder;
 
@@ -16,5 +17,9 @@ public class ModBlocks {
     //======= Tile Entities =======
     @ObjectHolder("oreoverhaul:ore_crusher_block")
     public static TileEntityType<OreCrusherTileEntity> ORE_CRUSHER_TILE_ENTITY;
+
+    //======= Containers =======
+    @ObjectHolder("oreoverhaul:ore_crusher_block")
+    public static ContainerType<OreCrusherContainer> ORE_CRUSHER_CONTAINER;
 
 }

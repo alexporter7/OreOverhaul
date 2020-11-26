@@ -1,9 +1,6 @@
 package com.alexp777.oreoverhaul;
 
-import com.alexp777.oreoverhaul.blocks.CopperBlock;
-import com.alexp777.oreoverhaul.blocks.ModBlocks;
-import com.alexp777.oreoverhaul.blocks.OreCrusherBlock;
-import com.alexp777.oreoverhaul.blocks.OreCrusherTileEntity;
+import com.alexp777.oreoverhaul.blocks.*;
 import com.alexp777.oreoverhaul.items.CopperIngot;
 import com.alexp777.oreoverhaul.setup.ClientProxy;
 import com.alexp777.oreoverhaul.setup.IProxy;
@@ -11,10 +8,13 @@ import com.alexp777.oreoverhaul.setup.ModSetup;
 import com.alexp777.oreoverhaul.setup.ServerProxy;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -104,7 +104,7 @@ public class OreOverhaul {
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
             LOGGER.info("Registering Blocks");
             blockRegistryEvent.getRegistry().register(new CopperBlock());
-            blockRegistryEvent.getRegistry().register(new OreCrusherBlock());
+            blockRegistryEvent.getRegistry().register(new OreCrusherBlock().setRegistryName("ore_crusher_block"));
         }
 
         @SubscribeEvent
@@ -119,9 +119,9 @@ public class OreOverhaul {
             //======= Block Items =======
             LOGGER.info("Registering Block Items");
             itemRegistryEvent.getRegistry().register(
-                    new BlockItem(ModBlocks.COPPER_BLOCK, itemProperties).setRegistryName(MOD_ID, "copper_block"));
+                    new BlockItem(ModBlocks.COPPER_BLOCK, itemProperties).setRegistryName(MOD_ID, ModSetup.COPPER_BLOCK_REGISTRY_NAME));
             itemRegistryEvent.getRegistry().register(
-                    new BlockItem(ModBlocks.ORE_CRUSHER_BLOCK, itemProperties).setRegistryName(MOD_ID, "ore_crusher_block"));
+                    new BlockItem(ModBlocks.ORE_CRUSHER_BLOCK, itemProperties).setRegistryName(MOD_ID, ModSetup.ORE_CRUSHER_REGISTRY_NAME));
         }
 
         @SubscribeEvent
@@ -129,8 +129,23 @@ public class OreOverhaul {
             //Register the Ore Crusher Tile Entity
             tileEntityRegistryEvent.getRegistry().register(TileEntityType.Builder
                     .create(OreCrusherTileEntity::new, ModBlocks.ORE_CRUSHER_BLOCK)
-                    .build(null).setRegistryName(MOD_ID,"ore_crusher_block"));
+                    .build(null).setRegistryName(MOD_ID,ModSetup.ORE_CRUSHER_REGISTRY_NAME));
 
+        }
+
+        @SubscribeEvent
+        public static void onContainerRegistry(final RegistryEvent.Register<ContainerType<?>> containerRegistryEvent) {
+            // Register the Ore Crusher Container
+//            containerRegistryEvent.getRegistry().register(IForgeContainerType.create(
+//                    ((windowId, inv, data) -> {
+//                        BlockPos blockPos = data.readBlockPos();
+//                        return new OreCrusherContainer(
+//                                windowId, OreOverhaul.proxy.getClientWorld(), blockPos, inv, OreOverhaul.proxy.getClientPlayer());
+//                    })
+//            ).setRegistryName(ModSetup.ORE_CRUSHER_REGISTRY_NAME));
+            containerRegistryEvent.getRegistry().register(
+                    IForgeContainerType.create(OreCrusherContainer::createContainerClientSide)
+                            .setRegistryName(MOD_ID, ModSetup.ORE_CRUSHER_REGISTRY_NAME));
         }
 
     }
