@@ -1,14 +1,11 @@
-package com.alexp777.oreoverhaul.blocks;
+package com.alexp777.oreoverhaul.blocks.orecrusher;
 
 import com.alexp777.oreoverhaul.OreOverhaul;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-
-import java.awt.*;
 
 
 public class OreCrusherScreen extends ContainerScreen<OreCrusherContainer> {

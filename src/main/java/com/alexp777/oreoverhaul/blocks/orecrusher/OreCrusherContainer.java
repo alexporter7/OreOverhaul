@@ -1,24 +1,12 @@
-package com.alexp777.oreoverhaul.blocks;
+package com.alexp777.oreoverhaul.blocks.orecrusher;
 
-import com.alexp777.oreoverhaul.OreOverhaul;
-import com.alexp777.oreoverhaul.setup.ClientProxy;
+import com.alexp777.oreoverhaul.setup.InitContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.SlotItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
-
-import static com.alexp777.oreoverhaul.blocks.ModBlocks.ORE_CRUSHER_CONTAINER;
 
 public class OreCrusherContainer extends Container {
 
@@ -91,9 +79,9 @@ public class OreCrusherContainer extends Container {
                                OreCrusherStateData oreCrusherStateData) {
 
         // Call the Super on the Ore Crusher Container
-        super(ORE_CRUSHER_CONTAINER, windowId);
+        super(InitContainer.ORE_CRUSHER.get(), windowId);
         // Make sure that Ore Crusher Container has been initialized
-        if(ORE_CRUSHER_CONTAINER == null) {
+        if(InitContainer.ORE_CRUSHER == null) {
             throw new IllegalStateException("Must initialize OreCrusherContainer before construction");
         }
         // Set the Class Variables
@@ -102,7 +90,9 @@ public class OreCrusherContainer extends Container {
         this.outputZoneContents = outputZoneContents;
         this.oreCrusherStateData = oreCrusherStateData;
 
-        // ======= State the X and Y spacing for the Slots
+        trackIntArray(oreCrusherStateData);
+
+        // ======= State the X and Y spacing for the Slots =======
         final int SLOT_X_SPACING = 18;
         final int SLOT_Y_SPACING = 18;
         final int HOTBAR_X_POS = 10; // 8

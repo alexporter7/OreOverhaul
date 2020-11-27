@@ -1,4 +1,4 @@
-package com.alexp777.oreoverhaul.blocks;
+package com.alexp777.oreoverhaul.blocks.orecrusher;
 
 import com.alexp777.oreoverhaul.setup.ModSetup;
 import net.minecraft.block.Block;
@@ -71,7 +71,6 @@ public class OreCrusherBlock extends ContainerBlock {
         if(world.isRemote()) {
             return ActionResultType.SUCCESS;
         }
-        System.out.println("made it to server part");
         INamedContainerProvider namedContainerProvider = getContainer(state, world, pos);
         System.out.println(namedContainerProvider);
         if(namedContainerProvider != null) {
@@ -80,9 +79,6 @@ public class OreCrusherBlock extends ContainerBlock {
             }
             ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) player;
             NetworkHooks.openGui(serverPlayerEntity, namedContainerProvider, (packetBuffer -> {}));
-            System.out.println("hey you made it");
-        } else {
-            System.out.println("This is null");
         }
         return ActionResultType.SUCCESS;
 

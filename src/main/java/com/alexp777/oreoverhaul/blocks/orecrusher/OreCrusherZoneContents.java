@@ -1,4 +1,4 @@
-package com.alexp777.oreoverhaul.blocks;
+package com.alexp777.oreoverhaul.blocks.orecrusher;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;

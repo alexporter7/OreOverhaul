@@ -1,19 +1,20 @@
-package com.alexp777.oreoverhaul.blocks;
+package com.alexp777.oreoverhaul.blocks.orecrusher;
 
+import com.alexp777.oreoverhaul.setup.InitTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
@@ -21,8 +22,6 @@ import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import static com.alexp777.oreoverhaul.blocks.ModBlocks.ORE_CRUSHER_TILE_ENTITY;
 
 public class OreCrusherTileEntity extends TileEntity implements ITickableTileEntity, INamedContainerProvider {
 
@@ -39,9 +38,12 @@ public class OreCrusherTileEntity extends TileEntity implements ITickableTileEnt
     private LazyOptional<IItemHandler> handler = LazyOptional.of(this::createHandler).cast();
 
     private static final String INVENTORY_TAG = "inv";
+    private static final String JAWS_ZONE_TAG = "jawSlot";
+    private static final String INPUT_ZONE_TAG = "inputSlot";
+    private static final String OUTPUT_ZONE_TAG = "outputSlot";
 
     public OreCrusherTileEntity() {
-        super(ORE_CRUSHER_TILE_ENTITY);
+        super(InitTileEntity.ORE_CRUSHER_TILE_ENTITY.get());
 
         jawZoneContents = OreCrusherZoneContents.createForTileEntity(
                 JAW_SLOTS_COUNT, this::canPlayerAccessInventory, this::markDirty);
@@ -53,7 +55,11 @@ public class OreCrusherTileEntity extends TileEntity implements ITickableTileEnt
 
     @Override
     public void tick() {
+        if(world.isRemote()) {
+            return;
+        }
 
+        markDirty();
     }
 
     public boolean canPlayerAccessInventory(PlayerEntity player) {
@@ -79,29 +85,72 @@ public class OreCrusherTileEntity extends TileEntity implements ITickableTileEnt
         return new ItemStackHandler(3);
     }
 
-    //Read NBT Tags
     @Override
     public void read(BlockState state, CompoundNBT tag) {
-        //Read the inventory NBT Data
-        CompoundNBT inventoryTag = tag.getCompound(INVENTORY_TAG);
-        handler.ifPresent(h -> ((INBTSerializable<CompoundNBT>)h).deserializeNBT(inventoryTag));
         super.read(state, tag);
+        oreCrusherStateData.readFromNBT(tag);
+
+        CompoundNBT inventoryNBT = tag.getCompound(JAWS_ZONE_TAG);
+        jawZoneContents.deserializeNBT(inventoryNBT);;
+
+        inventoryNBT = tag.getCompound(INPUT_ZONE_TAG);
+        inputZoneContents.deserializeNBT(inventoryNBT);
+
+        inventoryNBT = tag.getCompound(OUTPUT_ZONE_TAG);
+        outputZoneContents.deserializeNBT(inventoryNBT);
+
+        if (jawZoneContents.getSizeInventory() != JAW_SLOTS_COUNT
+                || inputZoneContents.getSizeInventory() != INPUT_SLOTS_COUNT
+                || outputZoneContents.getSizeInventory() != OUTPUT_SLOTS_COUNT) {
+            throw new IllegalArgumentException("Corrupted NBT: Number of inventory slots did not match expected");
+        }
+
     }
 
     //Write NBT Tags
     @Override
     public CompoundNBT write(CompoundNBT tag) {
         //Write our inventory NBT Data
-        handler.ifPresent(h -> {
-                CompoundNBT compoundInventory = ((INBTSerializable<CompoundNBT>)h).serializeNBT();
-                tag.put(INVENTORY_TAG, compoundInventory);
-        });
-        return super.write(tag);
+        super.write(tag);
+
+        oreCrusherStateData.putIntoNBT(tag);
+        tag.put(JAWS_ZONE_TAG, jawZoneContents.serializeNBT());
+        tag.put(INPUT_ZONE_TAG, inputZoneContents.serializeNBT());
+        tag.put(OUTPUT_ZONE_TAG, outputZoneContents.serializeNBT());
+
+        return tag;
+    }
+
+    @Override
+    @Nullable
+    public SUpdateTileEntityPacket getUpdatePacket() {
+        CompoundNBT updateTagDescribingTileEntityState = getUpdateTag();
+        final int METADATA = 42;
+        return new SUpdateTileEntityPacket(this.pos, METADATA, updateTagDescribingTileEntityState);
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+        CompoundNBT updateTagDescribingTileEntityState = pkt.getNbtCompound();
+        BlockState blockState = world.getBlockState(pos);
+        handleUpdateTag(blockState, updateTagDescribingTileEntityState);
+    }
+
+    @Override
+    public void handleUpdateTag(BlockState blockState, CompoundNBT tag) {
+        read(blockState, tag);
+    }
+
+    @Override
+    public CompoundNBT getUpdateTag() {
+        CompoundNBT nbtTagCompound = new CompoundNBT();
+        write(nbtTagCompound);
+        return nbtTagCompound;
     }
 
     @Override
     public ITextComponent getDisplayName() {
-        return new StringTextComponent(getType().getRegistryName().getPath());
+        return new StringTextComponent("Ore Crusher");
     }
 
     @Nullable
