@@ -1,0 +1,10 @@
+{
+  "type": "oreoverhaul:high_heat_furnace",
+  "ingredient": {
+    "item": "minecraft:gold_ore"
+  },
+  "result": {
+    "item": "minecraft:gold_block"
+  },
+  "freezetime": 200
+}

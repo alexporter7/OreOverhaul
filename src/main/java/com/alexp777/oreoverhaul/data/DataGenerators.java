@@ -1,8 +1,6 @@
 package com.alexp777.oreoverhaul.data;
 
 import com.alexp777.oreoverhaul.OreOverhaul;
-import com.alexp777.oreoverhaul.data.client.ModBlockStateProvider;
-import com.alexp777.oreoverhaul.data.client.ModItemModelProvider;
 import net.minecraft.data.DataGenerator;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,6 +24,8 @@ public final class DataGenerators {
         ModBlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(generator, existingFileHelper);
         generator.addProvider(blockTagsProvider);
         generator.addProvider(new ModItemTagsProvider(generator, blockTagsProvider, existingFileHelper));
+
+        generator.addProvider(new ModRecipeProvider(generator));
 
     }
 

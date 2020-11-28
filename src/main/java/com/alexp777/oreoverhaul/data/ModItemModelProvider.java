@@ -1,4 +1,4 @@
-package com.alexp777.oreoverhaul.data.client;
+package com.alexp777.oreoverhaul.data;
 
 import com.alexp777.oreoverhaul.OreOverhaul;
 import com.alexp777.oreoverhaul.setup.ModSetup;

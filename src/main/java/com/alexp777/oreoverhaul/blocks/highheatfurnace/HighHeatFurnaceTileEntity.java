@@ -35,13 +35,12 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemStackHandler;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTileEntity, INamedContainerProvider {
@@ -176,28 +175,73 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
             --this.burnTime;
         }
 
-        ItemStack catalystItem = this.inventory.getStackInSlot(CATALYST_ITEM_SLOT);
-        ItemStack inputItem = this.inventory.getStackInSlot(INPUT_ITEM_SLOT);
-        if(this.isBurning() && !inputItem.isEmpty() && !catalystItem.isEmpty()) {
-            if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
-                // Check if Smelting is complete, if not, increment this.cookTime
-                if(this.cookTime != this.cookTimeTotal) {
-                    this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, true));
-                    this.cookTime++;
-                    dirty = true;
-                } else {
-                    // After the smelting has finished, get OUTPUT for the item in the INPUT slot
-                    this.cookTime = 0;
-                    ItemStack outputItem = this.getRecipe(
-                            this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput();
-                    // Insert the item into the OUTPUT slot, then decrease the INPUT slot stack by 1
-                    this.inventory.insertItem(OUTPUT_ITEM_SLOT, outputItem.copy(), false);
-                    this.inventory.decrStackSize(INPUT_ITEM_SLOT, 1);
-                    this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, false));
-                    dirty = true;
-                }
+        if(!this.world.isRemote) {
+            ItemStack fuelItemStack = this.inventory.getStackInSlot(CATALYST_ITEM_SLOT);
+            ItemStack inputItemStack = this.inventory.getStackInSlot(INPUT_ITEM_SLOT);
+            ItemStack outputItemStack = ItemStack.EMPTY;
+            if(this.isBurning() && !inputItemStack.isEmpty()) {
+
+            }
+            else if(!this.isBurning() && !inputItemStack.isEmpty()) {
+
             }
         }
+
+//        ItemStack catalystItem = this.inventory.getStackInSlot(CATALYST_ITEM_SLOT);
+//        ItemStack inputItem = this.inventory.getStackInSlot(INPUT_ITEM_SLOT);
+//        if(this.isBurning() && !inputItem.isEmpty()) {
+//            if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
+//                // Check if Smelting is complete, if not, increment this.cookTime
+//                if(this.cookTime != this.cookTimeTotal) {
+//                    this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, true));
+//                    this.cookTime++;
+//                    dirty = true;
+//                } else {
+//                    // After the smelting has finished, get OUTPUT for the item in the INPUT slot
+//                    this.cookTime = 0;
+//                    ItemStack outputItem = this.getRecipe(
+//                            this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput();
+//                    // Insert the item into the OUTPUT slot, then decrease the INPUT slot stack by 1
+//                    this.inventory.insertItem(OUTPUT_ITEM_SLOT, outputItem.copy(), false);
+//                    this.inventory.decrStackSize(INPUT_ITEM_SLOT, 1);
+//                    this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, false));
+//                    dirty = true;
+//                }
+//            }
+//        } else if (!this.isBurning() && !inputItem.isEmpty() && !catalystItem.isEmpty()) {
+//            if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
+//                this.inventory.decrStackSize(CATALYST_ITEM_SLOT, 1);
+//                this.burnTime = 200;
+//                dirty = true;
+//            }
+//        }
+
+//        ItemStack catalystItem1 = this.inventory.getStackInSlot(CATALYST_ITEM_SLOT);
+//        ItemStack inputItem1 = this.inventory.getStackInSlot(INPUT_ITEM_SLOT);
+//        if(!inputItem1.isEmpty() && !catalystItem1.isEmpty()) {
+//            if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
+//                if(!this.isBurning()) {
+//                    this.inventory.decrStackSize(CATALYST_ITEM_SLOT, 1);
+//                    this.burnTime = 2000;
+//                    dirty = true;
+//                }
+//                if(this.isBurning()) {
+//                    if(this.cookTime != this.cookTimeTotal) {
+//                        this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, true));
+//                        this.cookTime++;
+//                        System.out.println(this.cookTime + " | " + this.cookTimeTotal);
+//                        dirty = true;
+//                    } else {
+//                        this.cookTime = 0;
+//                        ItemStack outputItem = this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput();
+//                        this.inventory.insertItem(OUTPUT_ITEM_SLOT, outputItem, false);
+//                        this.inventory.decrStackSize(INPUT_ITEM_SLOT, 1);
+//                        this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, false));
+//                        dirty = true;
+//                    }
+//                }
+//            }
+//        }
 
         if(dirty) {
             this.markDirty();
@@ -207,6 +251,22 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
 
     }
 
+    @Override
+    protected void invalidateCaps() {
+        super.invalidateCaps();
+    }
+
+    private boolean isFuel(ItemStack stack) {
+        return net.minecraftforge.common.ForgeHooks.getBurnTime(stack) > 0;
+    }
+
+    private int getBurnTime(ItemStack fuel) {
+        if(fuel.isEmpty()) {
+            return 0;
+        }
+        return net.minecraftforge.common.ForgeHooks.getBurnTime(fuel);
+    }
+
     @Nullable
     private HighHeatFurnaceRecipe getRecipe(ItemStack stack) {
         // If the Stack is Blank then there aren't any recipes
@@ -214,11 +274,13 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
             return null;
         }
         // Find all "High Heat Furnace Type Recipes"
-        Set<IRecipe<?>> recipes = findRecipesByType(InitRecipeSerializer.HIGH_HEAT_FURNACE_TYPE, this.world);
+        Set<IRecipe<?>> recipes = findRecipesByType(InitRecipeSerializer.Type.HIGH_HEAT_FURNACE, this.world);
+        System.out.println(recipes.size());
 
         // Iterate through each recipe
         for(IRecipe<?> iRecipe : recipes) {
             HighHeatFurnaceRecipe recipe = (HighHeatFurnaceRecipe) iRecipe;
+            System.out.println(recipe.getIngredients() + "\n" + recipe.getRecipeOutput().getDisplayName());
             // Check if there is a match based on the stack input
             if(recipe.matches(new RecipeWrapper(this.inventory), this.world)) {
                 return recipe;
@@ -231,7 +293,7 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
 
     public static Set<IRecipe<?>> findRecipesByType(IRecipeType<?> typeIn, World world) {
         if (world != null) {
-            world.getRecipeManager().getRecipes().stream()
+            return world.getRecipeManager().getRecipes().stream()
                     .filter(recipe -> recipe.getType() == typeIn)
                     .collect(Collectors.toSet());
         }
