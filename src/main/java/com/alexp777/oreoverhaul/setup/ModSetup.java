@@ -2,6 +2,7 @@ package com.alexp777.oreoverhaul.setup;
 
 import com.alexp777.oreoverhaul.OreOverhaul;
 import com.alexp777.oreoverhaul.blocks.InitBlock;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.Item;
@@ -19,6 +20,10 @@ public class ModSetup {
     public static final String ORE_CRUSHER_TE_REGISTRY_NAME = "ore_crusher_tile_entity";
     public static final String ORE_CRUSHER_CONTAINER_REGISTRY_NAME = "ore_crusher_container";
 
+    public static final String HIGH_HEAT_FURNACE_REGISTRY_NAME = "high_heat_furnace_block";
+    public static final String HIGH_HEAT_FURNACE_CONTAINER_REGISTRY_NAME = "high_heat_furnace_container";
+    public static final String HIGH_HEAT_FURNACE_SERIALIZER_REGISTRY_NAME = "high_heat_furnace_recipe_serializer";
+
     //======= Machine Related Block Properties =======
     public static final float MACHINE_HARDNESS = 4.0f;
     public static final SoundType MACHINE_SOUND = SoundType.METAL;
@@ -28,6 +33,12 @@ public class ModSetup {
     public static final float ORE_HARDNESS = 3.0f;
     public static final SoundType ORE_SOUND = SoundType.STONE;
     public static final Material ORE_MATERIAL = Material.ROCK;
+
+    //======= Machine Block Properties =======
+    public static final AbstractBlock.Properties MACHINE_PROPERTIES = AbstractBlock.Properties
+                                                                        .create(MACHINE_MATERIAL)
+                                                                        .hardnessAndResistance(MACHINE_HARDNESS)
+                                                                        .sound(MACHINE_SOUND);
 
     //======= Item Properties =======
     public static final int REGULAR_MAX_STACK_SIZE = 64;

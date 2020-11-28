@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "up": "oreoverhaul:block/high_heat_furnace_side",
+    "down": "oreoverhaul:block/high_heat_furnace_side",
+    "north": "oreoverhaul:block/high_heat_furnace_front",
+    "south": "oreoverhaul:block/high_heat_furnace_side",
+    "east": "oreoverhaul:block/high_heat_furnace_side",
+    "west": "oreoverhaul:block/high_heat_furnace_side",
+    "particle": "oreoverhaul:block/high_heat_furnace_side"
+  }
+}

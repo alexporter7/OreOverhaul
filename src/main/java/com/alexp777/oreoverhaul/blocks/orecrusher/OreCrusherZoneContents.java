@@ -1,9 +1,11 @@
 package com.alexp777.oreoverhaul.blocks.orecrusher;
 
+import javax.annotation.Nonnull;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import java.util.function.Predicate;
@@ -25,7 +27,7 @@ import java.util.function.Predicate;
  * Vanilla and the container code will take care of everything else.
  */
 
-public class OreCrusherZoneContents implements IInventory {
+public class OreCrusherZoneContents implements IItemHandler {
 
     /**
      * Use this constructor to create a FurnaceZoneContents which is linked to its parent TileEntity.
@@ -125,13 +127,13 @@ public class OreCrusherZoneContents implements IInventory {
     //  If you need special behaviour (eg a chest can only be used by a particular player) then either modify this method
     //    or ask the parent TileEntity.
 
-    @Override
+
     public boolean isUsableByPlayer(PlayerEntity player) {
         return canPlayerAccessInventoryLambda.test(player);  // on the client, this does nothing. on the server, ask our parent TileEntity.
     }
-
+//
     @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack) {
+    public boolean isItemValid(int index, ItemStack stack) {
         return furnaceComponentContents.isItemValid(index, stack);
     }
 
@@ -147,63 +149,88 @@ public class OreCrusherZoneContents implements IInventory {
     }
 
     @Override
-    public void markDirty() {
-        markDirtyNotificationLambda.invoke();
-    }
-
-    @Override
-    public void openInventory(PlayerEntity player) {
-        openInventoryNotificationLambda.invoke();
-    }
-
-    @Override
-    public void closeInventory(PlayerEntity player) {
-        closeInventoryNotificationLambda.invoke();
-    }
-
-    //---------These following methods are called by Vanilla container methods to manipulate the inventory contents ---
-
-    @Override
-    public int getSizeInventory() {
+    public int getSlots() {
         return furnaceComponentContents.getSlots();
     }
 
-    @Override
-    public boolean isEmpty() {
-        for (int i = 0; i < furnaceComponentContents.getSlots(); ++i) {
-            if (!furnaceComponentContents.getStackInSlot(i).isEmpty()) return false;
-        }
-        return true;
-    }
+    //    @Override
+//    public void markDirty() {
+//        markDirtyNotificationLambda.invoke();
+//    }
+//
+//    @Override
+//    public void openInventory(PlayerEntity player) {
+//        openInventoryNotificationLambda.invoke();
+//    }
+//
+//    @Override
+//    public void closeInventory(PlayerEntity player) {
+//        closeInventoryNotificationLambda.invoke();
+//    }
+//
+//    //---------These following methods are called by Vanilla container methods to manipulate the inventory contents ---
+//
 
+    public int getSizeInventory() {
+        return furnaceComponentContents.getSlots();
+    }
+//
+//    @Override
+//    public boolean isEmpty() {
+//        for (int i = 0; i < furnaceComponentContents.getSlots(); ++i) {
+//            if (!furnaceComponentContents.getStackInSlot(i).isEmpty()) return false;
+//        }
+//        return true;
+//    }
+//
     @Override
     public ItemStack getStackInSlot(int index) {
         return furnaceComponentContents.getStackInSlot(index);
     }
 
+    @Nonnull
     @Override
-    public ItemStack decrStackSize(int index, int count) {
-        if (count < 0) throw new IllegalArgumentException("count should be >= 0:" + count);
-        return furnaceComponentContents.extractItem(index, count, false);
+    public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
+        ItemStack leftoverItemStack = furnaceComponentContents.insertItem(slot, stack, false);
+        return leftoverItemStack;
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+        return furnaceComponentContents.extractItem(slot, amount, simulate);
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int index) {
-        int maxPossibleItemStackSize = furnaceComponentContents.getSlotLimit(index);
-        return furnaceComponentContents.extractItem(index, maxPossibleItemStackSize, false);
+    public int getSlotLimit(int slot) {
+        return furnaceComponentContents.getSlots();
     }
+//
+//    @Override
+//    public ItemStack decrStackSize(int index, int count) {
+//        if (count < 0) throw new IllegalArgumentException("count should be >= 0:" + count);
+//        return furnaceComponentContents.extractItem(index, count, false);
+//    }
+//
+//    @Override
+//    public ItemStack removeStackFromSlot(int index) {
+//        int maxPossibleItemStackSize = furnaceComponentContents.getSlotLimit(index);
+//        return furnaceComponentContents.extractItem(index, maxPossibleItemStackSize, false);
+//    }
+//
+//    @Override
+//    public void setInventorySlotContents(int index, ItemStack stack) {
+//        furnaceComponentContents.setStackInSlot(index, stack);
+//    }
 
-    @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
-        furnaceComponentContents.setStackInSlot(index, stack);
-    }
+//    @Override
+//    public void clear() {
+//        for (int i = 0; i < furnaceComponentContents.getSlots(); ++i) {
+//            furnaceComponentContents.setStackInSlot(i, ItemStack.EMPTY);
+//        }
+//    }
 
-    @Override
-    public void clear() {
-        for (int i = 0; i < furnaceComponentContents.getSlots(); ++i) {
-            furnaceComponentContents.setStackInSlot(i, ItemStack.EMPTY);
-        }
-    }
+
 
     //--------- useful functions that aren't in IInventory but are useful anyway
 

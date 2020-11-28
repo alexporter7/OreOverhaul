@@ -4,6 +4,7 @@ import com.alexp777.oreoverhaul.setup.InitTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
@@ -91,7 +92,8 @@ public class OreCrusherTileEntity extends TileEntity implements ITickableTileEnt
         oreCrusherStateData.readFromNBT(tag);
 
         CompoundNBT inventoryNBT = tag.getCompound(JAWS_ZONE_TAG);
-        jawZoneContents.deserializeNBT(inventoryNBT);;
+        System.out.println(inventoryNBT.toString());
+        jawZoneContents.deserializeNBT(inventoryNBT);
 
         inventoryNBT = tag.getCompound(INPUT_ZONE_TAG);
         inputZoneContents.deserializeNBT(inventoryNBT);

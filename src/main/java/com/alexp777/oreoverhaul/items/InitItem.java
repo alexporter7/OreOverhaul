@@ -1,6 +1,8 @@
 package com.alexp777.oreoverhaul.items;
 
 import com.alexp777.oreoverhaul.OreOverhaul;
+import com.alexp777.oreoverhaul.setup.ModSetup;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
@@ -12,6 +14,7 @@ public class InitItem {
             DeferredRegister.create(ForgeRegistries.ITEMS, OreOverhaul.MOD_ID);
 
     public static final RegistryObject<Item> COPPER_INGOT = ITEMS.register("copper_ingot", CopperIngot::new);
+
 
 
 }

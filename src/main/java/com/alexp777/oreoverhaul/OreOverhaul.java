@@ -1,9 +1,12 @@
 package com.alexp777.oreoverhaul;
 
 import com.alexp777.oreoverhaul.blocks.InitBlock;
+import com.alexp777.oreoverhaul.blocks.highheatfurnace.HighHeatFurnaceScreen;
 import com.alexp777.oreoverhaul.blocks.orecrusher.OreCrusherScreen;
+import com.alexp777.oreoverhaul.data.DataGenerators;
 import com.alexp777.oreoverhaul.items.InitItem;
 import com.alexp777.oreoverhaul.setup.InitContainer;
+import com.alexp777.oreoverhaul.setup.InitRecipeSerializer;
 import com.alexp777.oreoverhaul.setup.ModSetup;
 import com.alexp777.oreoverhaul.setup.InitTileEntity;
 import net.minecraft.client.gui.ScreenManager;
@@ -19,6 +22,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -45,11 +49,14 @@ public class OreOverhaul {
         MOD_EVENT_BUS = FMLJavaModLoadingContext.get().getModEventBus();
         MOD_EVENT_BUS.addListener(this::setup);
         MOD_EVENT_BUS.addListener(this::doClientStuff);
+        //MOD_EVENT_BUS.addListener(RegistryEvents::onItemsRegistry);
+        MOD_EVENT_BUS.addListener(DataGenerators::gatherData);
 
         InitItem.ITEMS.register(MOD_EVENT_BUS);
         InitBlock.BLOCKS.register(MOD_EVENT_BUS);
         InitTileEntity.TILE_ENTITY_TYPE.register(MOD_EVENT_BUS);
         InitContainer.CONTAINER_TYPE.register(MOD_EVENT_BUS);
+        InitRecipeSerializer.RECIPE_SERIALIZER.register(MOD_EVENT_BUS);
 
         instance = this;
         MinecraftForge.EVENT_BUS.register(this);
@@ -64,6 +71,7 @@ public class OreOverhaul {
         // do something that can only be done on the client
         LOGGER.info("Got game settings {}", event.getMinecraftSupplier().get().gameSettings);
         ScreenManager.registerFactory(InitContainer.ORE_CRUSHER.get(), OreCrusherScreen::new);
+        ScreenManager.registerFactory(InitContainer.HIGH_HEAT_FURNACE.get(), HighHeatFurnaceScreen::new);
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

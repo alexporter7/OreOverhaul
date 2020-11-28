@@ -1,0 +1,25 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "oreoverhaul:block/high_heat_furnace_block"
+    },
+    "facing=south": {
+      "model": "oreoverhaul:block/high_heat_furnace_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "oreoverhaul:block/high_heat_furnace_block",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "oreoverhaul:block/high_heat_furnace_block",
+      "y": 90
+    },
+    "facing=down": {
+      "model": "oreoverhaul:block/high_heat_furnace_block"
+    },
+    "facing=up": {
+      "model": "oreoverhaul:block/high_heat_furnace_block"
+    }
+  }
+}
