@@ -1,11 +1,11 @@
 {
   "type": "oreoverhaul:high_heat_furnace",
   "input": {
-    "item": "minecraft:gold_ore"
+    "item": "minecraft:iron_ore"
   },
   "result": {
-    "item": "minecraft:gold_block",
+    "item": "minecraft:iron_block",
     "count": 1
   },
-  "base_time": 20
+  "base_time": 100
 }

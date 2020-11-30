@@ -25,6 +25,6 @@ public class InitRecipeSerializer {
            DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, OreOverhaul.MOD_ID);
 
    public static final RegistryObject<IRecipeSerializer<HighHeatFurnaceRecipe>> HIGH_HEAT_FURNACE =
-           RECIPE_SERIALIZER.register("high_heat_furnace", () -> (new HighHeatFurnaceRecipe.Serializer()));
+           RECIPE_SERIALIZER.register("high_heat_furnace", HighHeatFurnaceRecipe.Serializer::new);
 
 }

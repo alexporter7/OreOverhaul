@@ -26,6 +26,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.IIntArray;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -200,6 +201,7 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
                     dirty = true;
                 }
             } else if( this.isBurning() && (this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null )) {
+                this.cookTimeTotal = this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getBaseTime();
                 if( this.cookTime < this.cookTimeTotal ) {
                     // If it's still cooking, increment the cookTime and mark dirty
                     this.cookTime++;
@@ -209,7 +211,7 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
                     this.cookTime = 0;
                     ItemStack outputItem = this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput();
                     // Insert the output item into the OUTPUT slot and decrease the INPUT slot
-                    this.inventory.setStackInSlot(OUTPUT_ITEM_SLOT, this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput());
+                    this.inventory.insertItem(OUTPUT_ITEM_SLOT, outputItem.copy(), false);
                     this.inventory.decrStackSize(INPUT_ITEM_SLOT, 1);
                     // Set the BlockState for LIT to false
                     this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, false));
@@ -433,7 +435,8 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
     }
 
     private ITextComponent getDefaultName() {
-        return new TranslationTextComponent(String.format("container.%s.high_heat_furnace", OreOverhaul.MOD_ID));
+        //return new TranslationTextComponent(String.format("container.%s.high_heat_furnace", OreOverhaul.MOD_ID));
+        return new StringTextComponent("High Heat Furnace");
     }
 
     public ITextComponent getName() {

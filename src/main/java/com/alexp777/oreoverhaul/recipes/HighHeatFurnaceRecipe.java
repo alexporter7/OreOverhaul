@@ -17,29 +17,23 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
 
     private final ResourceLocation id;
     private final String group;
-    //private final NBTIngredient original;
     private final Ingredient original;
     private final ItemStack result;
-    private final int freezeTime;
+    private final int baseTime;
 
-//    public HighHeatFurnaceRecipe(ResourceLocation id, String group, NBTIngredient original, ItemStack result, int freezeTime) {
-//        this.id = id;
-//        this.group = group;
-//        this.original = original;
-//        this.result = result;
-//        this.freezeTime = freezeTime;
-//    }
-
-    public HighHeatFurnaceRecipe(ResourceLocation id, String group, Ingredient original, ItemStack result, int freezeTime) {
+    public HighHeatFurnaceRecipe(ResourceLocation id, String group, Ingredient original, ItemStack result, int baseTime) {
         this.id = id;
         this.group = group;
         this.original = original;
         this.result = result;
-        this.freezeTime = freezeTime;
+        this.baseTime = baseTime;
     }
 
     @Override
@@ -72,13 +66,15 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
         return this.group;
     }
 
-    public int getFreezeTime() {
-        return freezeTime;
+    public int getBaseTime() {
+        return baseTime;
     }
 
     @Override
     public NonNullList<Ingredient> getIngredients() {
-        return NonNullList.withSize(1, this.original);
+        NonNullList<Ingredient> ingredientNonNullList = NonNullList.create();
+        ingredientNonNullList.add(this.original);
+        return ingredientNonNullList;
     }
 
     @Override
@@ -114,7 +110,8 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
 //        }
 
         @Override
-        public HighHeatFurnaceRecipe read(ResourceLocation recipeId, JsonObject json) {
+        @Nonnull
+        public HighHeatFurnaceRecipe read(@Nonnull ResourceLocation recipeId, @Nonnull JsonObject json) {
             // Get the Group
             final String group = JSONUtils.getString(json, "group", "");
             // Get the Input Element
@@ -126,7 +123,7 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
             // Get the Output Element
             final ItemStack output = ShapedRecipe.deserializeItem(JSONUtils.getJsonObject(json, "result"));
             // Get the Time required
-            final int time = 100; // TEMPORARY FOR NOW
+            final int time = JSONUtils.getInt(json, "base_time");
 
             return new HighHeatFurnaceRecipe(recipeId, group, inputIngredient, output, time);
 
@@ -142,11 +139,12 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
 //        }
 
         @Override
-        public HighHeatFurnaceRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+        @Nullable
+        public HighHeatFurnaceRecipe read(@Nonnull ResourceLocation recipeId, PacketBuffer buffer) {
             final String group = buffer.readString(32767);
             final Ingredient input = Ingredient.read(buffer);
             final ItemStack output = buffer.readItemStack();
-            final int time = 100; // TEMPORARY FOR NOW
+            final int time = buffer.readVarInt();
 
             return new HighHeatFurnaceRecipe(recipeId, group, input, output, time);
         }
@@ -156,7 +154,7 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
 //            buffer.writeString(recipe.group);
 //            recipe.original.write(buffer);
 //            buffer.writeItemStack(recipe.result);
-//            buffer.writeInt(recipe.freezeTime);
+//            buffer.writeInt(recipe.baseTime);
 //        }
 
         @Override
@@ -164,7 +162,7 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
             buffer.writeString(recipe.group);
             recipe.original.write(buffer);
             buffer.writeItemStack(recipe.result);
-            buffer.writeInt(recipe.freezeTime);
+            buffer.writeInt(recipe.baseTime);
         }
 
     }
