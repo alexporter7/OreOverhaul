@@ -144,16 +144,17 @@ public class HighHeatFurnaceBlock extends Block {
 
     @Override
     public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-
-        TileEntity tileEntity = worldIn.getTileEntity(pos);
-        if(tileEntity instanceof HighHeatFurnaceTileEntity) {
-            HighHeatFurnaceTileEntity highHeatFurnaceTileEntity = (HighHeatFurnaceTileEntity)tileEntity;
-            ((HighHeatFurnaceItemHandler)highHeatFurnaceTileEntity.getInventory()).toNonNullList().forEach(item -> {
-                ItemEntity itemEntity = new ItemEntity(worldIn, pos.getX(), pos.getY(), pos.getZ(), item);
-                worldIn.addEntity(itemEntity);
-            });
-        }
-
+        // This was causing issues when the block state would update so it
+        // needs to be rewritten
+//        TileEntity tileEntity = worldIn.getTileEntity(pos);
+//        if(tileEntity instanceof HighHeatFurnaceTileEntity) {
+//            HighHeatFurnaceTileEntity highHeatFurnaceTileEntity = (HighHeatFurnaceTileEntity)tileEntity;
+//            ((HighHeatFurnaceItemHandler)highHeatFurnaceTileEntity.getInventory()).toNonNullList().forEach(item -> {
+//                ItemEntity itemEntity = new ItemEntity(worldIn, pos.getX(), pos.getY(), pos.getZ(), item);
+//                worldIn.addEntity(itemEntity);
+//            });
+//        }
+//
         if(state.hasTileEntity() && state.getBlock() != newState.getBlock()) {
             worldIn.removeTileEntity(pos);
         }

@@ -2,12 +2,10 @@ package com.alexp777.oreoverhaul.recipes;
 
 import com.alexp777.oreoverhaul.blocks.InitBlock;
 import com.alexp777.oreoverhaul.setup.InitRecipeSerializer;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.*;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.NonNullList;
@@ -15,6 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.NBTIngredient;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.items.wrapper.RecipeWrapper;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
@@ -22,20 +21,12 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
 
     private final ResourceLocation id;
     private final String group;
-    private final NBTIngredient original;
-    //private final Ingredient original;
+    //private final NBTIngredient original;
+    private final Ingredient original;
     private final ItemStack result;
     private final int freezeTime;
 
-    public HighHeatFurnaceRecipe(ResourceLocation id, String group, NBTIngredient original, ItemStack result, int freezeTime) {
-        this.id = id;
-        this.group = group;
-        this.original = original;
-        this.result = result;
-        this.freezeTime = freezeTime;
-    }
-
-//    public HighHeatFurnaceRecipe(ResourceLocation id, String group, Ingredient original, ItemStack result, int freezeTime) {
+//    public HighHeatFurnaceRecipe(ResourceLocation id, String group, NBTIngredient original, ItemStack result, int freezeTime) {
 //        this.id = id;
 //        this.group = group;
 //        this.original = original;
@@ -43,9 +34,17 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
 //        this.freezeTime = freezeTime;
 //    }
 
+    public HighHeatFurnaceRecipe(ResourceLocation id, String group, Ingredient original, ItemStack result, int freezeTime) {
+        this.id = id;
+        this.group = group;
+        this.original = original;
+        this.result = result;
+        this.freezeTime = freezeTime;
+    }
+
     @Override
     public boolean matches(RecipeWrapper inv, World worldIn) {
-        return this.original.test(inv.getStackInSlot(0));
+        return this.original.test(inv.getStackInSlot(1));
     }
 
     @Override
@@ -105,23 +104,60 @@ public class HighHeatFurnaceRecipe implements IRecipe<RecipeWrapper> {
     public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>>
                                     implements IRecipeSerializer<HighHeatFurnaceRecipe> {
 
+//        @Override
+//        public HighHeatFurnaceRecipe read(ResourceLocation recipeId, JsonObject json) {
+//            String group = JSONUtils.getString(json, "group", "");
+//            NBTIngredient ingredient = NBTIngredient.Serializer.INSTANCE.parse(JSONUtils.getJsonObject(json, "ingredient"));
+//            ItemStack result = CraftingHelper.getItemStack(JSONUtils.getJsonObject(json, "result"), true);
+//            int time = JSONUtils.getInt(json, "freezetime", 0);
+//            return new HighHeatFurnaceRecipe(recipeId, group, ingredient, result, time);
+//        }
+
         @Override
         public HighHeatFurnaceRecipe read(ResourceLocation recipeId, JsonObject json) {
-            String group = JSONUtils.getString(json, "group", "");
-            NBTIngredient ingredient = NBTIngredient.Serializer.INSTANCE.parse(JSONUtils.getJsonObject(json, "ingredient"));
-            ItemStack result = CraftingHelper.getItemStack(JSONUtils.getJsonObject(json, "result"), true);
-            int time = JSONUtils.getInt(json, "freezetime", 0);
-            return new HighHeatFurnaceRecipe(recipeId, group, ingredient, result, time);
+            // Get the Group
+            final String group = JSONUtils.getString(json, "group", "");
+            // Get the Input Element
+            final JsonElement inputElement =
+                    JSONUtils.isJsonArray(json, "input")
+                            ? JSONUtils.getJsonArray(json, "input") // If it's an array
+                            : JSONUtils.getJsonObject(json, "input"); // If it's NOT an array
+            final Ingredient inputIngredient = Ingredient.deserialize(inputElement);
+            // Get the Output Element
+            final ItemStack output = ShapedRecipe.deserializeItem(JSONUtils.getJsonObject(json, "result"));
+            // Get the Time required
+            final int time = 100; // TEMPORARY FOR NOW
+
+            return new HighHeatFurnaceRecipe(recipeId, group, inputIngredient, output, time);
+
         }
+
+//        @Override
+//        public HighHeatFurnaceRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
+//            String group = buffer.readString(32767);
+//            NBTIngredient ingredient = NBTIngredient.Serializer.INSTANCE.parse(buffer);
+//            ItemStack result = buffer.readItemStack();
+//            int time = buffer.readVarInt();
+//            return new HighHeatFurnaceRecipe(recipeId, group, ingredient, result, time);
+//        }
 
         @Override
         public HighHeatFurnaceRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
-            String group = buffer.readString(32767);
-            NBTIngredient ingredient = NBTIngredient.Serializer.INSTANCE.parse(buffer);
-            ItemStack result = buffer.readItemStack();
-            int time = buffer.readVarInt();
-            return new HighHeatFurnaceRecipe(recipeId, group, ingredient, result, time);
+            final String group = buffer.readString(32767);
+            final Ingredient input = Ingredient.read(buffer);
+            final ItemStack output = buffer.readItemStack();
+            final int time = 100; // TEMPORARY FOR NOW
+
+            return new HighHeatFurnaceRecipe(recipeId, group, input, output, time);
         }
+
+//        @Override
+//        public void write(PacketBuffer buffer, HighHeatFurnaceRecipe recipe) {
+//            buffer.writeString(recipe.group);
+//            recipe.original.write(buffer);
+//            buffer.writeItemStack(recipe.result);
+//            buffer.writeInt(recipe.freezeTime);
+//        }
 
         @Override
         public void write(PacketBuffer buffer, HighHeatFurnaceRecipe recipe) {
