@@ -130,6 +130,25 @@ public class HighHeatFurnaceContainer extends Container {
         return isWithinUsableDistance(canInteractWithCallable, playerIn, InitBlock.HIGH_HEAT_FURNACE.get());
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public int getSmeltProgressionScaled() {
+        if( this.tileEntity.highHeatFurnaceData.get(HighHeatFurnaceTileEntity.COOK_TIME_STATE_INDEX) != 0
+                && this.tileEntity.highHeatFurnaceData.get(HighHeatFurnaceTileEntity.COOK_TIME_TOTAL_STATE_INDEX) != 0) {
+            return this.tileEntity.highHeatFurnaceData.get(HighHeatFurnaceTileEntity.COOK_TIME_STATE_INDEX) * 24
+                    / this.tileEntity.highHeatFurnaceData.get(HighHeatFurnaceTileEntity.COOK_TIME_TOTAL_STATE_INDEX);
+        }
+        return 0;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public int getTemperatureProgressionScaled() {
+        if( this.tileEntity.highHeatFurnaceData.get(HighHeatFurnaceTileEntity.TEMPERATURE_STATE_INDEX) != 0 ) {
+            return this.tileEntity.highHeatFurnaceData.get(HighHeatFurnaceTileEntity.TEMPERATURE_STATE_INDEX) * 47
+                    / 400;
+        }
+        return 0;
+    }
+
     @Override
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int sourceSlotIndex) {
 

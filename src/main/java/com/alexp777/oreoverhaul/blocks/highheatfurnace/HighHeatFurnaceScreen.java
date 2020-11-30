@@ -39,5 +39,15 @@ public class HighHeatFurnaceScreen extends ContainerScreen<HighHeatFurnaceContai
         RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f);
         this.minecraft.getTextureManager().bindTexture(HIGH_HEAT_FURNACE_GUI);
         this.blit(matrixStack, this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
+        this.blit(matrixStack, this.guiLeft + 84, this.guiTop + 25, //This is where it will draw
+                184, 1, //This is the offset of WHAT it will draw
+                this.container.getSmeltProgressionScaled(), 16); //This is HOW MUCH it will draw
+        this.blit(matrixStack, this.guiLeft + 165, this.guiTop + 17, 184, 30,
+                5, this.container.getTemperatureProgressionScaled());
+
+        // W: 5 H: 47
+        // x: 165 y: 17
+        // xO: 184, yO: 30
+        // 5 wide, scale 0, 47
     }
 }

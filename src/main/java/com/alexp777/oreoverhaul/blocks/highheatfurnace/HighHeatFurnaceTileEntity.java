@@ -58,6 +58,11 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
     private int cookTimeTotal = 100;
     private int temperature;
 
+    public static final int COOK_TIME_STATE_INDEX = 0;
+    public static final int BURN_TIME_STATE_INDEX = 1;
+    public static final int COOK_TIME_TOTAL_STATE_INDEX = 2;
+    public static final int TEMPERATURE_STATE_INDEX = 3;
+
     public final IIntArray highHeatFurnaceData = new IIntArray() {
         @Override
         public int get(int index) {
@@ -66,6 +71,10 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
                     return HighHeatFurnaceTileEntity.this.cookTime;
                 case 1:
                     return HighHeatFurnaceTileEntity.this.burnTime;
+                case 2:
+                    return HighHeatFurnaceTileEntity.this.cookTimeTotal;
+                case 3:
+                    return HighHeatFurnaceTileEntity.this.temperature;
                 default:
                     return 0;
             }
@@ -79,6 +88,12 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
                     break;
                 case 1:
                     HighHeatFurnaceTileEntity.this.burnTime = value;
+                    break;
+                case 2:
+                    HighHeatFurnaceTileEntity.this.cookTimeTotal = value;
+                    break;
+                case 3:
+                    HighHeatFurnaceTileEntity.this.temperature = value;
                     break;
             }
         }
@@ -165,25 +180,19 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
     @Override
     public void tick() {
 
-        //this.isRemote vs this.isRemote()
-        //if it's not burning AND there is a valid recipe
-        //  - Decrease Fuel Stack
-        //  - Set Burn Time
-        //  - Set state to LIT
-        //if it's burning
-        //  - if cook time != total
-        //      - cookTime++
-        //  - else
-        //      - cookTime = 0
-        //      - decrease input stack
-        //      - insert item into output stack
         if( !this.world.isRemote ) {
 
             boolean dirty = false;
 
             if(this.isBurning()) {
                 --this.burnTime;
-                //System.out.println(this.burnTime);
+                if ( temperature < 400 ) {
+                    temperature++;
+                }
+            } else {
+                if( temperature != 0) {
+                    temperature--;
+                }
             }
 
             // If the furnace IS NOT Burning, the INPUT and FUEL slot are NOT empty, and there is a VALID recipe
@@ -218,6 +227,11 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
                     // Mark Dirty
                     dirty = true;
                 }
+            } else if ((this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) == null)) {
+                if(this.cookTime != 0) {
+                    this.cookTime = 0;
+                    dirty = true;
+                }
             }
 
             if(dirty) {
@@ -227,91 +241,6 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
             }
 
         }
-
-//        if(!this.world.isRemote) {
-//            if(this.isBurning() && !this.inventory.getStackInSlot(INPUT_ITEM_SLOT).isEmpty()) {
-//                if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
-//                    if(this.cookTime != cookTimeTotal) {
-//                        this.cookTime++;
-//                        System.out.println("Cooktime: " + this.cookTime);
-//                        dirty = true;
-//                    } else {
-//                        this.cookTime = 0;
-//                        ItemStack outputItem = this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput();
-//                        this.inventory.insertItem(OUTPUT_ITEM_SLOT, outputItem, false);
-//                        this.inventory.extractItem(INPUT_ITEM_SLOT, 1, false);
-//                        dirty = true;
-//                    }
-//                }
-//            }
-//            else if(!this.isBurning()
-//                    && !this.inventory.getStackInSlot(INPUT_ITEM_SLOT).isEmpty()
-//                    && isFuel(this.inventory.getStackInSlot(CATALYST_ITEM_SLOT))) {
-//                this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, true));
-//                this.burnTime = this.inventory.getStackInSlot(CATALYST_ITEM_SLOT).getBurnTime();
-//                this.inventory.decrStackSize(CATALYST_ITEM_SLOT, 1);
-//                dirty = true;
-//            }
-//            else {
-//                this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, false));
-//            }
-//        }
-
-//        ItemStack catalystItem = this.inventory.getStackInSlot(CATALYST_ITEM_SLOT);
-//        ItemStack inputItem = this.inventory.getStackInSlot(INPUT_ITEM_SLOT);
-//        if(this.isBurning() && !inputItem.isEmpty()) {
-//            if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
-//                // Check if Smelting is complete, if not, increment this.cookTime
-//                if(this.cookTime != this.cookTimeTotal) {
-//                    this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, true));
-//                    this.cookTime++;
-//                    dirty = true;
-//                } else {
-//                    // After the smelting has finished, get OUTPUT for the item in the INPUT slot
-//                    this.cookTime = 0;
-//                    ItemStack outputItem = this.getRecipe(
-//                            this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput();
-//                    // Insert the item into the OUTPUT slot, then decrease the INPUT slot stack by 1
-//                    this.inventory.insertItem(OUTPUT_ITEM_SLOT, outputItem.copy(), false);
-//                    this.inventory.decrStackSize(INPUT_ITEM_SLOT, 1);
-//                    this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, false));
-//                    dirty = true;
-//                }
-//            }
-//        } else if (!this.isBurning() && !inputItem.isEmpty() && !catalystItem.isEmpty()) {
-//            if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
-//                this.inventory.decrStackSize(CATALYST_ITEM_SLOT, 1);
-//                this.burnTime = 200;
-//                dirty = true;
-//            }
-//        }
-
-//        ItemStack catalystItem1 = this.inventory.getStackInSlot(CATALYST_ITEM_SLOT);
-//        ItemStack inputItem1 = this.inventory.getStackInSlot(INPUT_ITEM_SLOT);
-//        if(!inputItem1.isEmpty() && !catalystItem1.isEmpty()) {
-//            if(this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)) != null) {
-//                if(!this.isBurning()) {
-//                    this.inventory.decrStackSize(CATALYST_ITEM_SLOT, 1);
-//                    this.burnTime = 2000;
-//                    dirty = true;
-//                }
-//                if(this.isBurning()) {
-//                    if(this.cookTime != this.cookTimeTotal) {
-//                        this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, true));
-//                        this.cookTime++;
-//                        System.out.println(this.cookTime + " | " + this.cookTimeTotal);
-//                        dirty = true;
-//                    } else {
-//                        this.cookTime = 0;
-//                        ItemStack outputItem = this.getRecipe(this.inventory.getStackInSlot(INPUT_ITEM_SLOT)).getRecipeOutput();
-//                        this.inventory.insertItem(OUTPUT_ITEM_SLOT, outputItem, false);
-//                        this.inventory.decrStackSize(INPUT_ITEM_SLOT, 1);
-//                        this.world.setBlockState(this.getPos(), this.getBlockState().with(HighHeatFurnaceBlock.LIT, false));
-//                        dirty = true;
-//                    }
-//                }
-//            }
-//        }
 
     }
 
@@ -349,7 +278,6 @@ public class HighHeatFurnaceTileEntity extends TileEntity implements ITickableTi
                 return recipe;
             }
         }
-
         // If no match is returned after the for loop, then there aren't any matches
         return null;
     }
