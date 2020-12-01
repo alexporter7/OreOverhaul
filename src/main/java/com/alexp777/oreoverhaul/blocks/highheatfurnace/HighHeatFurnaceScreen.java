@@ -42,8 +42,11 @@ public class HighHeatFurnaceScreen extends ContainerScreen<HighHeatFurnaceContai
         this.blit(matrixStack, this.guiLeft + 84, this.guiTop + 25, //This is where it will draw
                 184, 1, //This is the offset of WHAT it will draw
                 this.container.getSmeltProgressionScaled(), 16); //This is HOW MUCH it will draw
-        this.blit(matrixStack, this.guiLeft + 165, this.guiTop + 17, 184, 30,
-                5, this.container.getTemperatureProgressionScaled());
+
+        this.blit(matrixStack, this.guiLeft + 165, this.guiTop + 17,
+                184,  30,
+                5, 47 - this.container.getTemperatureProgressionScaled());
+
 
         // W: 5 H: 47
         // x: 165 y: 17
